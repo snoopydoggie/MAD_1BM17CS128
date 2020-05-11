@@ -1,56 +1,83 @@
-package com.example.calculator;
+package com.example.lab56;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    TextView t;
-    EditText num1;
-    EditText num2;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+    DatabaseHelper myDB;
+    Button insert_btn,display_btn,delete_btn,update_btn;
+    EditText et1,et2;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        t = (TextView)findViewById(R.id.textView);
-        num1 = (EditText)findViewById(R.id.editText);
-        num2 = (EditText)findViewById(R.id.editText2);
-        Button add = (Button)findViewById(R.id.button);
-        Button sub = (Button)findViewById(R.id.button2);
-        Button mul = (Button)findViewById(R.id.button3);
-        Button div = (Button) findViewById(R.id.button4);
-        add.setOnClickListener(this);
-        sub.setOnClickListener(this);
-        mul.setOnClickListener(this);
-        div.setOnClickListener(this);
+        myDB = new DatabaseHelper(this);
+        et1 = (EditText) findViewById(R.id.editText);
+        et2 = (EditText) findViewById(R.id.editText2);
+        insert_btn = (Button) findViewById(R.id.button);
+        display_btn = (Button) findViewById(R.id.button2);
+        delete_btn = (Button) findViewById(R.id.button3);
+        update_btn = (Button) findViewById(R.id.button4);
+        insert_btn.setOnClickListener(this);
+        display_btn.setOnClickListener(this);
+        delete_btn.setOnClickListener(this);
+        update_btn.setOnClickListener(this);
     }
-    @Override
-    public void onClick(View v){
-        int n1 = Integer.parseInt(num1.getText().toString());
-        int n2 = Integer.parseInt(num2.getText().toString());
+    public void showMessage(String message)
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setMessage(message);
+        builder.show();
+    }
 
-        switch (v.getId()){
-            case R.id.button:
-                t.setText(String.valueOf(n1+n2));
-                break;
-            case R.id.button2:
-                t.setText(String.valueOf(n1-n2));
-                break;
-            case R.id.button3:
-                t.setText(String.valueOf(n1*n2));
-                break;
-            case R.id.button4:
-                if(n2==0)
-                    t.setText("0 division error");
-                else
-                    t.setText(String.valueOf(n1/n2));
-                break;
-
+    public void onClick(View v) {
+        if(v.getId()==R.id.button)
+        {
+            if (et1.getText().toString().trim().length() == 0 ||et2.getText().toString().trim().length() == 0)
+            {
+                showMessage("Error,Please enter all values!");
+                return;
+            }
+            myDB.insert_record(et1.getText().toString(),Integer.parseInt(et2.getText().toString()));
+            showMessage("Success, Record Inserted!");
+            clearText();
         }
+        if(v.getId()==R.id.button2){
+            StringBuffer record_details=myDB.display_all_records();
+            showMessage(record_details.toString());
+        }
+        if(v.getId()==R.id.button3)
+        {
+            if(et1.getText().toString().trim().length() == 0)
+            {
+                showMessage("Error, Please enter name!");
+                return;
+            }
+            myDB.delete_record(et1.getText().toString());
+            showMessage("Success,Record Deleted!");
+            clearText();
+        }
+        if(v.getId()==R.id.button4)
+        {
+            if(et1.getText().toString().trim().length()==0||et2.getText().toString().trim().length() == 0)
+            {
+                showMessage("Error, Please enter data!");
+                return;
+            }
+            myDB.update_record(et1.getText().toString(),Integer.parseInt(et2.getText().toString()));
+            showMessage("Success,Record Updated!");
+            clearText();
+        }
+    }
+    public void clearText()
+    {
+        et1.setText("");
+        et2.setText("");
     }
 }
